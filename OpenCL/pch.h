@@ -18,5 +18,6 @@
 #include <complex>
 #include <iostream>
 #include <valarray>
+#include <vector>
 
 #endif //PCH_H
