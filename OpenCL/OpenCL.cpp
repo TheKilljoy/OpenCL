@@ -3,7 +3,6 @@
 #include "CL/cl.hpp"
 #include "Timer.h"
 #include "opencv2/opencv.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
 
 int main(int argc, char** argv)
 {
@@ -25,8 +24,8 @@ int main(int argc, char** argv)
 	cv::Mat outImg = originalImg.clone();
 
 	OpenCLProgram prog("Grayscale_Kernel.cl", "grayScale");
-	prog.setImage2D(0, originalImg.cols, originalImg.rows, originalImg.cols * originalImg.channels(), originalImg.data, true);
-	prog.setImage2D(1, originalImg.cols, originalImg.rows, originalImg.cols * originalImg.channels(), outImg.data, false);
+	prog.setImage2D(0, originalImg.cols, originalImg.rows, (size_t) (originalImg.cols) * (size_t)(originalImg.channels()), originalImg.data, true);
+	prog.setImage2D(1, originalImg.cols, originalImg.rows, (size_t) (originalImg.cols) * (size_t)(originalImg.channels()), outImg.data, false);
 
 	prog.startProgram(cl::NDRange(originalImg.cols, originalImg.rows));
 	std::vector<void*> result = prog.getResults();
