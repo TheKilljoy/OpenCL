@@ -41,21 +41,41 @@ OpenCLProgram::~OpenCLProgram()
 {
 }
 
-void OpenCLProgram::startProgram(unsigned int count) const
+void OpenCLProgram::startProgram(const cl::NDRange& global) const
 {
 	timer->start("GPU calculations");
-	m_Queue->enqueueNDRangeKernel(*m_Kernel, cl::NullRange, cl::NDRange(count), cl::NullRange);
+	m_Queue->enqueueNDRangeKernel(*m_Kernel, cl::NullRange, global, cl::NullRange);
 }
 
-std::vector<void*> OpenCLProgram::getResult(int size) const
+void OpenCLProgram::startProgram(const cl::NDRange& local, const cl::NDRange& global) const
+{
+	m_Queue->enqueueNDRangeKernel(*m_Kernel, cl::NullRange, global, local);
+}
+
+std::vector<void*> OpenCLProgram::getResults() const
 {
 	m_Queue->finish();
 	timer->stop();
 	std::vector<void*> out;
 	for (int i = 0; i < m_OutBuffers.size(); ++i)
 	{
-		m_Queue->enqueueReadBuffer(*m_OutBuffers[i].first, true, NULL, size, m_OutBuffers[i].second);
+		m_Queue->enqueueReadBuffer(*m_OutBuffers[i].first, true, NULL, outputSizes[i], m_OutBuffers[i].second);
 		out.push_back(m_OutBuffers[i].second);
+	}
+
+	cl::size_t<3> origin;
+	origin[0] = 0;
+	origin[1] = 0;
+	origin[2] = 0;
+
+	for (int i = 0; i < m_OutImages2D.size(); ++i)
+	{
+		cl::size_t<3> region;
+		region[0] = outputImgDimensions[i * 3 + 0];
+		region[1] = outputImgDimensions[i * 3 + 1];
+		region[2] = 1;
+		m_Queue->enqueueReadImage(*m_OutImages2D[i].first, true, origin, region, outputImgDimensions[i * 3 + 2], 0, m_OutImages2D[i].second);
+		out.push_back(m_OutImages2D[i].second);
 	}
 	return out;
 }
@@ -120,17 +140,52 @@ void OpenCLProgram::setArg(const int index, void* buffer, size_t size, bool read
 	if (readOnly)
 	{
 		m_ReadOnlyBuffers.push_back(std::make_unique<cl::Buffer>(*m_Context, CL_MEM_READ_ONLY, size, buffer, &error));
-		m_Queue->enqueueWriteBuffer(*m_ReadOnlyBuffers.back(), true, 0, size, buffer);
 		errorMsg = "ERROR: Couldn't create OpenCL Buffer. Errorcode: " + std::to_string(error);
 		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
+		m_Queue->enqueueWriteBuffer(*m_ReadOnlyBuffers.back(), true, 0, size, buffer);
 		m_Kernel->setArg(index, *m_ReadOnlyBuffers.back());
 	}
 	else
 	{
+		outputSizes.push_back(size);
 		m_OutBuffers.push_back(
 			std::make_pair(std::make_unique<cl::Buffer>(*m_Context, CL_MEM_WRITE_ONLY, size, buffer, &error), buffer));
 		errorMsg = "ERROR: Couldn't create OpenCL Buffer. Errorcode: " + std::to_string(error);
 		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
 		m_Kernel->setArg(index, *m_OutBuffers.back().first);
+	}
+}
+
+void OpenCLProgram::setImage2D(const int index, const size_t width, const size_t height, const size_t widthInBytes, const unsigned char* imageData, bool readOnly)
+{
+	cl_int error;
+	std::string errorMsg;
+	cl::size_t<3> origin;
+	origin[0] = 0;
+	origin[1] = 0;
+	origin[2] = 0;
+	cl::size_t<3> region;
+	region[0] = width;
+	region[1] = height;
+	region[2] = 1;
+	cl::ImageFormat format(CL_BGRA, CL_UNSIGNED_INT8);
+		//cl::ImageFormat(CL_BGRA, CL_UNSIGNED_INT8)
+	if (readOnly)
+	{
+		m_ReadOnlyImages2D.push_back(std::make_unique<cl::Image2D>(*m_Context, CL_MEM_READ_ONLY, cl::ImageFormat(CL_BGRA, CL_UNSIGNED_INT8), width, height, widthInBytes, (void*)imageData, &error));
+		errorMsg = "ERROR: Couldn't create OpenCL Image2D. Errorcode: " + std::to_string(error);
+		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
+		m_Queue->enqueueWriteImage(*m_ReadOnlyImages2D.back(), true, origin, region, widthInBytes, 0, (void*)imageData);
+		m_Kernel->setArg(index, *m_ReadOnlyImages2D.back());
+	}
+	else
+	{
+		outputImgDimensions.push_back(width);
+		outputImgDimensions.push_back(height);
+		outputImgDimensions.push_back(widthInBytes);
+		m_OutImages2D.push_back(std::make_pair(std::make_unique<cl::Image2D>(*m_Context, CL_MEM_WRITE_ONLY, cl::ImageFormat(CL_BGRA, CL_UNSIGNED_INT8), width, height, widthInBytes, (void*)imageData, &error), (void*)imageData));
+		errorMsg = "ERROR: Couldn't create OpenCL Image2D. Errorcode: " + std::to_string(error);
+		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
+		m_Kernel->setArg(index, *m_OutImages2D.back().first);
 	}
 }
