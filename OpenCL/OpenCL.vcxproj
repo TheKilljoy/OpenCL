@@ -181,7 +181,9 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="GaussianBlur.cl" />
     <None Include="Square_Kernel.cl" />
+    <None Include="YCbCr_Kernel.cl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Grayscale_Kernel.cl" />

@@ -43,6 +43,12 @@
     <None Include="Square_Kernel.cl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="YCbCr_Kernel.cl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="GaussianBlur.cl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Grayscale_Kernel.cl">
