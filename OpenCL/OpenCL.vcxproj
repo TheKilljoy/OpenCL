@@ -171,6 +171,7 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileWriter.cpp" />
     <ClCompile Include="OpenCL.cpp" />
     <ClCompile Include="OpenCLProgram.cpp" />
     <ClCompile Include="pch.cpp">
