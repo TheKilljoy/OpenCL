@@ -165,6 +165,7 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FileWriter.h" />
     <ClInclude Include="OpenCLProgram.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Timer.h" />
