@@ -165,11 +165,13 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FileWriter.h" />
     <ClInclude Include="OpenCLProgram.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileWriter.cpp" />
     <ClCompile Include="OpenCL.cpp" />
     <ClCompile Include="OpenCLProgram.cpp" />
     <ClCompile Include="pch.cpp">
@@ -181,7 +183,9 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="GaussianBlur.cl" />
     <None Include="Square_Kernel.cl" />
+    <None Include="YCbCr_Kernel.cl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Grayscale_Kernel.cl" />

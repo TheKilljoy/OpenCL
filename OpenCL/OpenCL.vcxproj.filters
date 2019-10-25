@@ -24,6 +24,9 @@
     <ClInclude Include="Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FileWriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -38,9 +41,18 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FileWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Square_Kernel.cl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="YCbCr_Kernel.cl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="GaussianBlur.cl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
