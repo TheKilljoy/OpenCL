@@ -3,17 +3,20 @@
 
 FileWriter::FileWriter(const std::string& path) {
 	filename = "measurements.csv";
+	iBuffer = new std::string();
 	this->loadOldData(path);
 	this->openFile(path);
 }
 
 FileWriter::FileWriter(const std::string& path, const std::string& filename): filename(filename) {
+	iBuffer = new std::string();
 	this->loadOldData(path);
 	this->openFile(path);
 }
 
 FileWriter::~FileWriter() {
 	this->closeFile();
+	delete iBuffer;
 }
 
 void FileWriter::openFile(const std::string& path) {
