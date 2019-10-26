@@ -34,7 +34,6 @@ OpenCLProgram::OpenCLProgram(const std::string & filepath, const char* kernelNam
 	const std::string* kernelContent = loadKernelFile(filepath);
 	init(kernelContent, kernelName);
 	delete kernelContent;
-	std::cout << "SUCCESS\n";
 }
 
 OpenCLProgram::~OpenCLProgram()

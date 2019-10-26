@@ -1,5 +1,5 @@
-#include "FileWriter.h"
 #include "pch.h"
+#include "FileWriter.h"
 
 FileWriter::FileWriter(const std::string& path) {
 	filename = "measurements.csv";

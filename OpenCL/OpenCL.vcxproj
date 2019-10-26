@@ -107,6 +107,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>C:\Program Files %28x86%29\AMD APP\include;$(SolutionDir)external/include/;$(CUDA_PATH)\include</AdditionalIncludeDirectories>
+      <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,7 +117,8 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(SolutionDir)external\bin\*.dll $(TargetDir) /Y
-xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
+xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y
+xcopy $(SolutionDir)res\jpgs\*.jpg $(TargetDir)jpgs\ /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -150,6 +152,7 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>C:\Program Files %28x86%29\AMD APP\include;$(SolutionDir)external/include/;$(CUDA_PATH)\include;</AdditionalIncludeDirectories>
+      <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -161,7 +164,8 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(SolutionDir)external\bin\*.dll $(TargetDir) /Y
-xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
+xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y
+xcopy $(SolutionDir)res\jpgs\*.jpg $(TargetDir)jpgs\ /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -183,9 +187,11 @@ xcopy $(SolutionDir)res\pngs\*.png $(TargetDir)pngs\ /Y</Command>
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CvtBGR2YCrCb_Kernel.cl" />
+    <None Include="CvtYCrCb2BGR_Kernel.cl" />
     <None Include="GaussianBlur.cl" />
+    <None Include="CvtImage2D_BGR2YCrCb_Kernel.cl" />
     <None Include="Square_Kernel.cl" />
-    <None Include="YCbCr_Kernel.cl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Grayscale_Kernel.cl" />

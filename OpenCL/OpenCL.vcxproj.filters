@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Kernels">
+      <UniqueIdentifier>{16b08cb5-7e95-4fb5-9ae3-c9912ff874d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -46,19 +49,25 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Square_Kernel.cl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="YCbCr_Kernel.cl">
-      <Filter>Resource Files</Filter>
+    <None Include="CvtBGR2YCrCb_Kernel.cl">
+      <Filter>Kernels</Filter>
     </None>
     <None Include="GaussianBlur.cl">
-      <Filter>Resource Files</Filter>
+      <Filter>Kernels</Filter>
+    </None>
+    <None Include="Square_Kernel.cl">
+      <Filter>Kernels</Filter>
+    </None>
+    <None Include="CvtImage2D_BGR2YCrCb_Kernel.cl">
+      <Filter>Kernels</Filter>
+    </None>
+    <None Include="CvtYCrCb2BGR_Kernel.cl">
+      <Filter>Kernels</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Grayscale_Kernel.cl">
-      <Filter>Resource Files</Filter>
+      <Filter>Kernels</Filter>
     </Text>
   </ItemGroup>
 </Project>
