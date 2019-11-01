@@ -140,7 +140,7 @@ void OpenCLProgram::setArg(const int index, void* buffer, size_t size, bool read
 
 	if (readOnly)
 	{
-		m_ReadOnlyBuffers.push_back(std::make_unique<cl::Buffer>(*m_Context, CL_MEM_READ_ONLY, size, buffer, &error));
+		m_ReadOnlyBuffers.push_back(std::make_unique<cl::Buffer>(*m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, size, buffer, &error));
 		errorMsg = "ERROR: Couldn't create OpenCL Buffer. Errorcode: " + std::to_string(error);
 		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
 		m_Queue->enqueueWriteBuffer(*m_ReadOnlyBuffers.back(), true, 0, size, buffer);
@@ -150,7 +150,7 @@ void OpenCLProgram::setArg(const int index, void* buffer, size_t size, bool read
 	{
 		outputSizes.push_back(size);
 		m_OutBuffers.push_back(
-			std::make_pair(std::make_unique<cl::Buffer>(*m_Context, CL_MEM_WRITE_ONLY, size, buffer, &error), buffer));
+			std::make_pair(std::make_unique<cl::Buffer>(*m_Context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, size, buffer, &error), buffer));
 		errorMsg = "ERROR: Couldn't create OpenCL Buffer. Errorcode: " + std::to_string(error);
 		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
 		m_Kernel->setArg(index, *m_OutBuffers.back().first);

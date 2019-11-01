@@ -1,18 +1,18 @@
-__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
-__kernel void gaussianBlur(read_only image2d_t originalPicture, write_only image2d_t outImage, __constant float* mask, __private int masksize)
+__kernel void gaussianBlur(read_only image2d_t originalPicture, write_only image2d_t outImage, __global float* mask, __private int maskSize)
 {
 	int2 pos = {get_global_id(0), get_global_id(1)};
 	float4 temp;
 	float4 outputPixel;
 	float4 sum = {0.0f, 0.0f, 0.0f, 0.0f};
 
-	for(int a = -maskSize; a < maskSize+1; a++) {
-		for(int b = -maskSize; b < maskSize+1, b++){
-			temp = convert_float4(read_imagef(originalPicture, sampler, pos + (int2)(a,b));
-			sum.x += mask[a+maskSize+(b+maskSize)*(maskSize*2+1)]*temp.x;
-			sum.y += mask[a+maskSize+(b+maskSize)*(maskSize*2+1)]*temp.y;
-			sum.z += mask[a+maskSize+(b+maskSize)*(maskSize*2+1)]*temp.z;
+	for(int a = -maskSize; a < maskSize + 1; a++) {
+		for(int b = -maskSize; b < maskSize + 1; b++){
+			temp = convert_float4(read_imagef(originalPicture, sampler, pos + (int2)(a,b)));
+			sum.x += mask[a + maskSize + (b + maskSize) * (maskSize * 2 + 1)] * temp.x;
+			sum.y += mask[a + maskSize + (b + maskSize) * (maskSize * 2 + 1)] * temp.y;
+			sum.z += mask[a + maskSize + (b + maskSize) * (maskSize * 2 + 1)] * temp.z;
 		}
 	}
 	outputPixel.x = sum.x;
@@ -22,7 +22,7 @@ __kernel void gaussianBlur(read_only image2d_t originalPicture, write_only image
 	write_imagef(outImage, pos, outputPixel);
 }
 
-__kernel void gaussianBlurOld(read_only image2d_t originalPicture, write_only image2d_t outImage, __constant float* mask, __private int masksize)
+__kernel void gaussianBlurOld(read_only image2d_t originalPicture, write_only image2d_t outImage, __constant float* mask, __private int maskSize)
 {
 	int2 pos = {get_global_id(0), get_global_id(1)};
 	float4 temp;
@@ -60,7 +60,7 @@ __kernel void gaussianBlurOld(read_only image2d_t originalPicture, write_only im
 
 }
 
-__kernel void createMaskParallel(__readOnly float sigma, __global int masksize, __global float* mask, __global int* sum)
+__kernel void createMaskParallel(__global float* mask, __global int* sum, __private float sigma, __private int masksize)
 {
 	int2 pos = (int2)(get_global_id(0), get_global_id(1));
 	float temp;
@@ -69,7 +69,8 @@ __kernel void createMaskParallel(__readOnly float sigma, __global int masksize, 
 	mask[pos.x + masksize + (pos.y + masksize) * (masksize * 2 + 1)] = temp;
 }
 
-__kernel void createMask(__readOnly float sigma, __global int* masksize, __global float* mask)
+/*
+__kernel void createMask(__global int* masksize, __global float* mask, __private float sigma)
 {
 	int size = (int)(ceil(2.57 * sigma));
 	float* newMask = new float[(size * 2 + 1) * (size * 2 + 1)];
@@ -88,3 +89,4 @@ __kernel void createMask(__readOnly float sigma, __global int* masksize, __globa
 	*masksize = size;
 	mask = newMask;
 }
+*/
