@@ -170,12 +170,14 @@ xcopy $(SolutionDir)res\jpgs\*.jpg $(TargetDir)jpgs\ /Y</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="FileWriter.h" />
+    <ClInclude Include="Mask.h" />
     <ClInclude Include="OpenCLProgram.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileWriter.cpp" />
+    <ClCompile Include="Mask.cpp" />
     <ClCompile Include="OpenCL.cpp" />
     <ClCompile Include="OpenCLProgram.cpp" />
     <ClCompile Include="pch.cpp">
