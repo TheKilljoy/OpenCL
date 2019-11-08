@@ -2,12 +2,24 @@
 #include "OpenCLProgram.h"
 #include "CL/cl.hpp"
 #include "Timer.h"
-#include "opencv2/opencv.hpp"
 #include "Mask.h"
+#include "Options.h"
+#include "ArgumentParser.h"
+
+#include "opencv2/opencv.hpp"
+
 
 
 int main(int argc, char** argv)
 {
+	//ArgumentParser parser;
+	//Options options;
+	//// check arguments
+	//if (parser.parseArguments(argc, argv, options))
+	//{
+	//	std::cout << "Success\n";
+	//}
+
 	std::string currentFolder = argv[0];
 	currentFolder = currentFolder.substr(0, currentFolder.find_last_of("\\"));
 	std::string imgFile = currentFolder + "\\jpgs\\Barns_grand_tetons.jpg";
@@ -20,7 +32,7 @@ int main(int argc, char** argv)
 
 	if (originalImg.channels() == 3)
 	{
-		cv::cvtColor(originalImg, originalImg, cv::COLOR_BGRA2BGR);
+		cv::cvtColor(originalImg, originalImg, cv::COLOR_BGR2BGRA);
 	}
 
 	//cv::Mat outImg = originalImg.clone();
@@ -43,8 +55,8 @@ int main(int argc, char** argv)
 
 	t.start("GaussianBlur");
 	OpenCLProgram prog("GaussianBlur.cl", "gaussianBlur");
-	prog.setImage2D(0, (size_t)(originalImg.cols), (size_t)(originalImg.rows), 3, originalImg.data, true);
-	prog.setImage2D(1, (size_t)(outImg.cols), (size_t)(outImg.rows), 3, outImg.data, false);
+	prog.setImage2D(0, (size_t)(originalImg.cols), (size_t)(originalImg.rows), (size_t)(originalImg.channels()), originalImg.data, true);
+	prog.setImage2D(1, (size_t)(outImg.cols), (size_t)(outImg.rows), (size_t)(originalImg.channels()), outImg.data, false);
 	prog.setArg(2, mask, sizeof(float) * (maskSize * 2 + 1) * (maskSize * 2 + 1), true);
 	prog.setArg(3, maskSize);
 	prog.startProgram(cl::NDRange(originalImg.cols, originalImg.rows));
