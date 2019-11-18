@@ -35,8 +35,8 @@ int main(int argc, char** argv)
 		cv::cvtColor(originalImg, originalImg, cv::COLOR_BGR2BGRA);
 	}
 
-	//cv::Mat outImg = originalImg.clone();
-	cv::Mat outImg(originalImg.rows, originalImg.cols, originalImg.type());
+	cv::Mat outImg = originalImg.clone();
+	// cv::Mat outImg(originalImg.rows, originalImg.cols, CV_8UC3);
 	cv::Mat openCV2YCrCb = originalImg.clone();
 	cv::Mat openCVGaus;
 
@@ -54,11 +54,11 @@ int main(int argc, char** argv)
 	printf("\n");
 
 	t.start("GaussianBlur");
-	OpenCLProgram prog("GaussianBlur.cl", "gaussianBlur");
+	OpenCLProgram prog("TestKernel.cl", "coolTest");
 	prog.setImage2D(0, (size_t)(originalImg.cols), (size_t)(originalImg.rows), (size_t)(originalImg.channels()), originalImg.data, true);
-	prog.setImage2D(1, (size_t)(outImg.cols), (size_t)(outImg.rows), (size_t)(originalImg.channels()), outImg.data, false);
-	prog.setArg(2, mask, sizeof(float) * (maskSize * 2 + 1) * (maskSize * 2 + 1), true);
-	prog.setArg(3, maskSize);
+	prog.setImage2D(1, (size_t)(outImg.cols), (size_t)(outImg.rows), (size_t)(outImg.channels()), outImg.data, false);
+	//prog.setArg(2, mask, sizeof(float) * (maskSize * 2 + 1) * (maskSize * 2 + 1), true);
+	//prog.setArg(3, maskSize);
 	prog.startProgram(cl::NDRange(originalImg.cols, originalImg.rows));
 	prog.getResults();
 	t.stop();
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 	cv::GaussianBlur(originalImg, openCVGaus, cv::Size(5, 5), 2);
 
 	cv::Mat delta(originalImg.rows, originalImg.cols, CV_8UC3);
-	delta = originalImg - outImg;
+	delta = originalImg - openCVGaus;
 
 	cv::imwrite(currentFolder + "\\original.png", originalImg);
 	cv::imwrite(currentFolder + "\\Out_Blur.png", outImg);

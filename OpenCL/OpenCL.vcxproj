@@ -197,6 +197,7 @@ xcopy $(SolutionDir)res\jpgs\*.jpg $(TargetDir)jpgs\ /Y</Command>
     <None Include="GaussianBlur.cl" />
     <None Include="CvtImage2D_BGR2YCrCb_Kernel.cl" />
     <None Include="Square_Kernel.cl" />
+    <None Include="TestKernel.cl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Grayscale_Kernel.cl" />
