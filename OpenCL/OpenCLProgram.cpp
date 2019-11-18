@@ -157,7 +157,7 @@ void OpenCLProgram::setArg(const int index, void* buffer, size_t size, bool read
 	}
 }
 
-void OpenCLProgram::setImage2D(const int index, const size_t width, const size_t height, const size_t widthInBytes, const unsigned char* imageData, bool readOnly)
+void OpenCLProgram::setImage2D(const int index, const size_t width, const size_t height, const size_t pixelwidthInByte, const unsigned char* imageData, bool readOnly)
 {
 	cl_int error;
 	std::string errorMsg;
@@ -171,18 +171,18 @@ void OpenCLProgram::setImage2D(const int index, const size_t width, const size_t
 	region[2] = 1;
 	if (readOnly)
 	{
-		m_ReadOnlyImages2D.push_back(std::make_unique<cl::Image2D>(*m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_BGRA, CL_UNSIGNED_INT8), width, height, widthInBytes * width, (void*)imageData, &error));
+		m_ReadOnlyImages2D.push_back(std::make_unique<cl::Image2D>(*m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_BGRA, CL_UNSIGNED_INT8), width, height, pixelwidthInByte * width, (void*)imageData, &error));
 		errorMsg = "ERROR: Couldn't create OpenCL Image2D. Errorcode: " + std::to_string(error);
 		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
-		m_Queue->enqueueWriteImage(*m_ReadOnlyImages2D.back(), true, origin, region, widthInBytes, 0, (void*)imageData);
+		m_Queue->enqueueWriteImage(*m_ReadOnlyImages2D.back(), true, origin, region, pixelwidthInByte * width, 0, (void*)imageData);
 		m_Kernel->setArg(index, *m_ReadOnlyImages2D.back());
 	}
 	else
 	{
 		outputImgDimensions.push_back(width);
 		outputImgDimensions.push_back(height);
-		outputImgDimensions.push_back(widthInBytes);
-		m_OutImages2D.push_back(std::make_pair(std::make_unique<cl::Image2D>(*m_Context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_BGRA, CL_UNSIGNED_INT8), width, height, widthInBytes * width, (void*)imageData, &error), (void*)imageData));
+		outputImgDimensions.push_back(pixelwidthInByte * width);
+		m_OutImages2D.push_back(std::make_pair(std::make_unique<cl::Image2D>(*m_Context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_BGRA, CL_UNSIGNED_INT8), width, height, pixelwidthInByte * width, (void*)imageData, &error), (void*)imageData));
 		errorMsg = "ERROR: Couldn't create OpenCL Image2D. Errorcode: " + std::to_string(error);
 		M_Assert(error == CL_SUCCESS, errorMsg.c_str());
 		m_Kernel->setArg(index, *m_OutImages2D.back().first);
