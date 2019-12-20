@@ -5,7 +5,7 @@ __kernel void gaussianBlur(__read_only image2d_t originalPicture, __write_only i
 	int2 pos = {get_global_id(0), get_global_id(1)};
 	uint4 temp;
 	uint4 outputPixel;
-	float4 sum = {0.0f, 0.0f, 0.0f, 0.0f};
+	float4 sum = {0.0f, 0.0f, 0.0f, 255.0f};
 
 	for(int a = -maskSize; a < maskSize + 1; a++) {
 		for(int b = -maskSize; b < maskSize + 1; b++){
@@ -15,50 +15,9 @@ __kernel void gaussianBlur(__read_only image2d_t originalPicture, __write_only i
 			sum.s2 += mask[a + maskSize + (b + maskSize) * (maskSize * 2 + 1)] * temp.s2;
 		}
 	}
-
-	outputPixel.s0 = (uint)(sum.s0);
-	outputPixel.s1 = (uint)(sum.s1);
-	outputPixel.s2 = (uint)(sum.s2);
-	outputPixel.s3 = 1;
+	
+	outputPixel = convert_uint4_sat_rte(sum);
 	write_imageui(outImage, pos, outputPixel);
-}
-
-__kernel void gaussianBlurOld(read_only image2d_t originalPicture, write_only image2d_t outImage, __constant float* mask, __private int maskSize)
-{
-	int2 pos = {get_global_id(0), get_global_id(1)};
-	float4 temp;
-	float4 outputPixel;
-
-    // Collect neighbor values and multiply with Gaussian for R component
-    float sum = 0.0f;
-    for(int a = -maskSize; a < maskSize+1; a++) {
-        for(int b = -maskSize; b < maskSize+1; b++) {
-			temp = convert_float4(read_imagef(originalPicture, sampler, pos + (int2)(a,b)));
-            sum += mask[a+maskSize+(b+maskSize)*(maskSize*2+1)]*temp.x;
-        }
-    }
-	outputPixel.x = sum;
-	    // Collect neighbor values and multiply with Gaussian for G component
-    sum = 0.0f;
-    for(int a = -maskSize; a < maskSize+1; a++) {
-        for(int b = -maskSize; b < maskSize+1; b++) {
-			temp = convert_float4(read_imagef(originalPicture, sampler, pos + (int2)(a,b)));
-            sum += mask[a+maskSize+(b+maskSize)*(maskSize*2+1)]*temp.y;
-        }
-    }
-	outputPixel.y = sum;
-	    // Collect neighbor values and multiply with Gaussian for B component
-    sum = 0.0f;
-    for(int a = -maskSize; a < maskSize+1; a++) {
-        for(int b = -maskSize; b < maskSize+1; b++) {
-			temp = convert_float4(read_imagef(originalPicture, sampler, pos + (int2)(a,b)));
-            sum += mask[a+maskSize+(b+maskSize)*(maskSize*2+1)]*temp.z;
-        }
-    }
-	outputPixel.z = sum;
-	outputPixel.w = 1.0f;
-	write_imagef(outImage, pos, outputPixel);
-
 }
 
 __kernel void createMaskParallel(__global float* mask, __global int* sum, __private float sigma, __private int masksize)
