@@ -79,6 +79,9 @@
     <None Include="CvtYCrCb2BGR_Kernel.cl">
       <Filter>Kernels</Filter>
     </None>
+    <None Include="TestKernel.cl">
+      <Filter>Kernels</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Grayscale_Kernel.cl">
