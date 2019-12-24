@@ -1,6 +1,7 @@
 #pragma once
 
-class ImageProcess {
+class ImageProcess
+{
 public:
 	ImageProcess();
 	~ImageProcess();

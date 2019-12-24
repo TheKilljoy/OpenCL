@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 	Timer t;
 
 	int maskSize;
-	float* mask = Mask::createBlurMask(2.0f, &maskSize);
+	float* mask = Mask::createBlurMask(10.0f, &maskSize);
 
 	t.start("GaussianBlur with CPU");
 	cv::Mat outCPU = process.blurWithGaus(originalImg, mask, maskSize);

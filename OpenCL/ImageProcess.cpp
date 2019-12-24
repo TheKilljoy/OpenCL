@@ -1,9 +1,9 @@
-#include "ImageProcess.h"
-#include "opencv2/opencv.hpp"
 #include "pch.h"
+#include "opencv2/opencv.hpp"
+#include "ImageProcess.h"
 
-ImageProcess::ImageProcess() { }
-ImageProcess::~ImageProcess() { }
+ImageProcess::ImageProcess(){}
+ImageProcess::~ImageProcess(){}
 
 cv::Mat ImageProcess::blurWithGaus(const cv::Mat& originalImage, const float* mask, const int maskSize) const
 {
