@@ -7,6 +7,7 @@
 #include "ArgumentParser.h"
 
 #include "opencv2/opencv.hpp"
+#include "ImageProcess.h"
 
 
 
@@ -40,10 +41,16 @@ int main(int argc, char** argv)
 	cv::Mat openCV2YCrCb = originalImg.clone();
 	cv::Mat openCVGaus;
 
+	ImageProcess process;
+
 	Timer t;
 
 	int maskSize;
 	float* mask = Mask::createBlurMask(2.0f, &maskSize);
+
+	t.start("GaussianBlur with CPU");
+	cv::Mat outCPU = process.blurWithGaus(originalImg, mask, maskSize);
+	t.stop();
 	
 	t.start("GaussianBlur");
 	OpenCLProgram prog("GaussianBlur.cl", "gaussianBlur");
@@ -62,6 +69,7 @@ int main(int argc, char** argv)
 
 	cv::imwrite(currentFolder + "\\original.png", originalImg);
 	cv::imwrite(currentFolder + "\\Out_Blur.png", outImg);
+	cv::imwrite(currentFolder + "\\Out_Blur_CPU.png", outCPU);
 	cv::imwrite(currentFolder + "\\delta.png", delta);
 	cv::imwrite(currentFolder + "\\Gaus.png", openCVGaus);
 	delete mask;
