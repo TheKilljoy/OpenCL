@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 	ImageProcess process;
 
 	Timer t;
-
+	/*
 	int maskSize;
 	float* mask = Mask::createBlurMask(10.0f, &maskSize);
 
@@ -73,8 +73,12 @@ int main(int argc, char** argv)
 	cv::imwrite(currentFolder + "\\delta.png", delta);
 	cv::imwrite(currentFolder + "\\Gaus.png", openCVGaus);
 	delete mask;
+	*/
 
-	/*
+	t.start("BGR zu YCrCb CPU");
+	cv::Mat outCPU = process.convertBGR2YCrCb(originalImg);
+	t.stop();
+	
 	t.start("BGR zu YCrCb");
 	OpenCLProgram prog("CvtBGR2YCrCb_Kernel.cl", "convertBGR2YCrCb");
 	prog.setArg(0, originalImg.data, (size_t)(originalImg.rows) * (size_t)(originalImg.cols) * (size_t)(originalImg.channels()), true);
@@ -106,6 +110,7 @@ int main(int argc, char** argv)
 	cv::imwrite(currentFolder + "\\Out_YCrCb.png", outImg);
 	cv::imwrite(currentFolder + "\\Out_CV2_YCrCb.png", originalImg);
 	cv::imwrite(currentFolder + "\\Out_BGR_From_YCrCb.png", backToBGR);
-	*/
+	cv::imwrite(currentFolder + "\\Out_YCrCb_CPU.png", outCPU);
+	
 	return 0;
 }
