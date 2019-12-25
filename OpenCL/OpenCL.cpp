@@ -5,99 +5,134 @@
 #include "Mask.h"
 #include "Options.h"
 #include "ArgumentParser.h"
-
 #include "opencv2/opencv.hpp"
+#include <filesystem>
 
 
 
 int main(int argc, char** argv)
 {
-	//ArgumentParser parser;
-	//Options options;
-	//// check arguments
-	//if (parser.parseArguments(argc, argv, options))
-	//{
-	//	std::cout << "Success\n";
-	//}
-
-	std::string currentFolder = argv[0];
-	currentFolder = currentFolder.substr(0, currentFolder.find_last_of("\\"));
-	std::string imgFile = currentFolder + "\\jpgs\\Barns_grand_tetons.jpg";
-	cv::Mat	originalImg = cv::imread(imgFile);
-	if (originalImg.data == nullptr)
+	ArgumentParser parser;
+	Options options;
+	// check arguments
+	if (!parser.parseArguments(argc, argv, options))
 	{
-		std::cout << "Image file not found!\n";
+		std::cout << "Error while parsing command line arguments\n";
 		std::exit(1);
 	}
 
-	if (originalImg.channels() == 3)
-	{
-		cv::cvtColor(originalImg, originalImg, cv::COLOR_BGR2BGRA);
-	}
-
-	cv::Mat outImg = originalImg.clone();
-	// cv::Mat outImg(originalImg.rows, originalImg.cols, CV_8UC3);
-	cv::Mat openCV2YCrCb = originalImg.clone();
-	cv::Mat openCVGaus;
-
+	std::vector<cv::Mat> originals;
+	std::vector<cv::Mat> resultsGuassianBlur;
+	std::vector<cv::Mat> resultsYCbCr;
+	std::vector<cv::Mat> resultsOpenCVGaussianBlur;
+	std::vector<cv::Mat> resultsOpenCVYCbCr;
+	std::vector<cv::Mat> deltas;
 	Timer t;
 
-	int maskSize;
-	float* mask = Mask::createBlurMask(2.0f, &maskSize);
-	
-	t.start("GaussianBlur");
-	OpenCLProgram prog("GaussianBlur.cl", "gaussianBlur");
-	prog.setImage2D(0, (size_t)(originalImg.cols), (size_t)(originalImg.rows), (size_t)(originalImg.channels()), originalImg.data, true);
-	prog.setImage2D(1, (size_t)(outImg.cols), (size_t)(outImg.rows), (size_t)(outImg.channels()), outImg.data, false);
-	prog.setArg(2, mask, sizeof(float) * (maskSize * 2 + 1) * (maskSize * 2 + 1), true);
-	prog.setArg(3, maskSize);
-	prog.startProgram(cl::NDRange(originalImg.cols, originalImg.rows));
-	prog.getResults();
-	t.stop();
+	// initalize all images
+	std::cout << "Loading Images:\n";
+	for (int i = 0; i < options.inputFiles.size(); ++i)
+	{
+		//ToDo: GaussianBlur needs to have 4 channels
+		originals.push_back(cv::imread(options.inputFiles[i]));
+		if (originals[i].channels() == 3) cv::cvtColor(originals[i], originals[i], cv::COLOR_BGR2BGRA);
+		if (options.gaussianBlur)
+		{
+			resultsGuassianBlur.push_back(originals[i].clone());
+			resultsOpenCVGaussianBlur.push_back(originals[i].clone());
+		}
+		if (options.conversionRGBToYCbCr)
+		{
+			resultsYCbCr.push_back(originals[i].clone());
+			resultsOpenCVYCbCr.push_back(originals[i].clone());
+		}
+		std::cout << "   loaded file: " << options.fileNames[i] << '\n';
+	}
 
-	cv::GaussianBlur(originalImg, openCVGaus, cv::Size(5, 5), 2, 2);
+	// channel conversion?
 
-	cv::Mat delta(originalImg.rows, originalImg.cols, CV_8UC3);
-	delta = originalImg - openCVGaus;
+	// gaussian blur
+	if (options.gaussianBlur)
+	{
+		std::cout << "Start Gaussian Blur Routine\n";
+		int maskSize;
+		float* mask = Mask::createBlurMask(2.0f, &maskSize);
+		t.start("GaussianBlur");
+		for (int i = 0; i < originals.size(); ++i)
+		{
+			OpenCLProgram prog("GaussianBlur.cl", "gaussianBlur");
+			prog.setImage2D(0, (size_t)(originals[i].cols), (size_t)(originals[i].rows), (size_t)(originals[i].channels()), originals[i].data, true);
+			prog.setImage2D(1, (size_t)(resultsGuassianBlur[i].cols), (size_t)(resultsGuassianBlur[i].rows), (size_t)(resultsGuassianBlur[i].channels()), resultsGuassianBlur[i].data, false);
+			prog.setArg(2, mask, sizeof(float) * (maskSize * 2 + 1) * (maskSize * 2 + 1), true);
+			prog.setArg(3, maskSize);
+			prog.startProgram(cl::NDRange(originals[i].cols, originals[i].rows));
+			prog.getResults();
+		}
+		t.stop();
 
-	cv::imwrite(currentFolder + "\\original.png", originalImg);
-	cv::imwrite(currentFolder + "\\Out_Blur.png", outImg);
-	cv::imwrite(currentFolder + "\\delta.png", delta);
-	cv::imwrite(currentFolder + "\\Gaus.png", openCVGaus);
-	delete mask;
+		t.start("GaussianBlur OpenCV");
+		for (int i = 0; i < originals.size(); ++i)
+		{
+			cv::GaussianBlur(originals[i], resultsOpenCVGaussianBlur[i], cv::Size(5, 5), 2, 2);
+		}
+		t.stop();
 
-	/*
-	t.start("BGR zu YCrCb");
-	OpenCLProgram prog("CvtBGR2YCrCb_Kernel.cl", "convertBGR2YCrCb");
-	prog.setArg(0, originalImg.data, (size_t)(originalImg.rows) * (size_t)(originalImg.cols) * (size_t)(originalImg.channels()), true);
-	prog.setArg(1, outImg.data, (size_t)(outImg.rows) * (size_t)(outImg.cols) * (size_t)(outImg.channels()), false);
-	prog.setArg(2, originalImg.cols * originalImg.channels());
-	prog.startProgram(cl::NDRange(originalImg.cols, originalImg.rows));
-	prog.getResults();
-	t.stop();
+		for (int i = 0; i < originals.size(); ++i)
+		{
+			deltas.push_back(resultsGuassianBlur[i] - resultsOpenCVGaussianBlur[i]);
+		}
+		delete[] mask;
+	}
 
+	if (options.conversionRGBToYCbCr)
+	{
+		std::cout << "Start Color Conversion Routine\n";
+		t.start("BGR zu YCrCb");
+		for (int i = 0; i < originals.size(); ++i)
+		{
+			OpenCLProgram prog("CvtBGR2YCrCb_Kernel.cl", "convertBGR2YCrCb");
+			prog.setArg(0, originals[i].data, (size_t)(originals[i].rows) * (size_t)(originals[i].cols) * (size_t)(originals[i].channels()), true);
+			prog.setArg(1, resultsYCbCr[i].data, (size_t)(resultsYCbCr[i].rows) * (size_t)(resultsYCbCr[i].cols) * (size_t)(resultsYCbCr[i].channels()), false);
+			prog.setArg(2, originals[i].cols * originals[i].channels());
+			prog.startProgram(cl::NDRange(originals[i].cols, originals[i].rows));
+			prog.getResults();
+		}
+		t.stop();
 
-	t.start("OpenCV BGR zu YCrCb");
-	cv::cvtColor(originalImg, openCV2YCrCb, cv::COLOR_BGR2YCrCb);
-	t.stop();
+		t.start("BGR zu YCrCb OpenCV");
+		for (int i = 0; i < originals.size(); ++i)
+		{
+			cv::cvtColor(originals[i], resultsOpenCVYCbCr[i], cv::COLOR_BGR2YCrCb);
+		}
+		t.stop();
 
-	cv::Mat delta(originalImg.rows, originalImg.cols, CV_8UC3);
-	cv::Mat backToBGR(originalImg.rows, originalImg.cols, CV_8UC3);
-	delta = originalImg - outImg;
+		for (int i = 0; i < originals.size(); ++i)
+		{
+			//openCV ycbcr conversion always removes the alpha channel, so it has to be restored
+			cv::cvtColor(resultsOpenCVYCbCr[i], resultsOpenCVYCbCr[i], cv::COLOR_BGR2BGRA);
+			deltas.push_back(resultsYCbCr[i] - resultsOpenCVYCbCr[i]);
+		}
+	}
 
-	t.start("YCrCb zu BGR");
-	OpenCLProgram prog2("CvtYCrCb2BGR_Kernel.cl", "convertYCrCb2BGR");
-	prog2.setArg(0, outImg.data, (size_t)(outImg.rows) * (size_t)(outImg.cols) * (size_t)(outImg.channels()), true);
-	prog2.setArg(1, backToBGR.data, (size_t)(backToBGR.rows) * (size_t)(backToBGR.cols) * (size_t)(backToBGR.channels()), false);
-	prog2.setArg(2, outImg.cols * outImg.channels());
-	prog2.startProgram(cl::NDRange(outImg.cols, outImg.rows));
-	prog2.getResults();
-	t.stop();
-
-	cv::imwrite(currentFolder + "\\Out_Delta.png", delta);
-	cv::imwrite(currentFolder + "\\Out_YCrCb.png", outImg);
-	cv::imwrite(currentFolder + "\\Out_CV2_YCrCb.png", originalImg);
-	cv::imwrite(currentFolder + "\\Out_BGR_From_YCrCb.png", backToBGR);
-	*/
+	//output all
+	std::cout << "Saving results...\n";
+	for (int i = 0; i < resultsGuassianBlur.size(); ++i)
+	{
+		cv::imwrite(options.outputDir + "\\GaussianBlur_" + options.fileNames[i], resultsGuassianBlur[i]);
+		std::cout << "   " << options.outputDir + "\\GaussianBlur_" + options.fileNames[i] << '\n';
+		cv::imwrite(options.outputDir + "\\Deltas_GaussianBlur_" + options.fileNames[i], deltas[i]);
+		std::cout << "   " << options.outputDir + "\\Deltas_GaussianBlur_" + options.fileNames[i] << '\n';
+	}
+	for (int i = 0; i < resultsOpenCVYCbCr.size(); ++i)
+	{
+		cv::imwrite(options.outputDir + "\\YCbCr_" + options.fileNames[i], resultsOpenCVYCbCr[i]);
+		std::cout << "   " << options.outputDir + "\\YCbCr_" + options.fileNames[i] << '\n';
+		if (options.gaussianBlur) 
+			cv::imwrite(options.outputDir + "\\Deltas_YCbCr_" + options.fileNames[i], deltas[i + resultsOpenCVYCbCr.size() - 1]);
+		else
+			cv::imwrite(options.outputDir + "\\Deltas_YCbCr_" + options.fileNames[i], deltas[i]);
+		std::cout << "   " << options.outputDir + "\\Deltas_YCbCr_" + options.fileNames[i] << '\n';
+	}
+	std::cout << "finished\n";
 	return 0;
 }
