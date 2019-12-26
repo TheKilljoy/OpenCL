@@ -6,6 +6,7 @@
 #include "Options.h"
 #include "ArgumentParser.h"
 #include "opencv2/opencv.hpp"
+#include "ImageProcess.h"
 #include <filesystem>
 
 
@@ -20,7 +21,7 @@ int main(int argc, char** argv)
 		std::cout << "Error while parsing command line arguments\n";
 		std::exit(1);
 	}
-
+  
 	std::vector<cv::Mat> originals;
 	std::vector<cv::Mat> resultsGuassianBlur;
 	std::vector<cv::Mat> resultsYCbCr;
@@ -33,7 +34,6 @@ int main(int argc, char** argv)
 	std::cout << "Loading Images:\n";
 	for (int i = 0; i < options.inputFiles.size(); ++i)
 	{
-		//ToDo: GaussianBlur needs to have 4 channels
 		originals.push_back(cv::imread(options.inputFiles[i]));
 		if (originals[i].channels() == 3) cv::cvtColor(originals[i], originals[i], cv::COLOR_BGR2BGRA);
 		if (options.gaussianBlur)
@@ -48,8 +48,6 @@ int main(int argc, char** argv)
 		}
 		std::cout << "   loaded file: " << options.fileNames[i] << '\n';
 	}
-
-	// channel conversion?
 
 	// gaussian blur
 	if (options.gaussianBlur)
@@ -84,6 +82,7 @@ int main(int argc, char** argv)
 		delete[] mask;
 	}
 
+  // color conversion rgb to ycbcr
 	if (options.conversionRGBToYCbCr)
 	{
 		std::cout << "Start Color Conversion Routine\n";

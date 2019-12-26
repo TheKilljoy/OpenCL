@@ -175,6 +175,7 @@ xcopy $(SolutionDir)res\jpgs\*.jpg $(TargetDir)jpgs\ /Y</Command>
   <ItemGroup>
     <ClInclude Include="ArgumentParser.h" />
     <ClInclude Include="FileWriter.h" />
+    <ClInclude Include="ImageProcess.h" />
     <ClInclude Include="Mask.h" />
     <ClInclude Include="OpenCLProgram.h" />
     <ClInclude Include="Options.h" />
@@ -184,6 +185,7 @@ xcopy $(SolutionDir)res\jpgs\*.jpg $(TargetDir)jpgs\ /Y</Command>
   <ItemGroup>
     <ClCompile Include="ArgumentParser.cpp" />
     <ClCompile Include="FileWriter.cpp" />
+    <ClCompile Include="ImageProcess.cpp" />
     <ClCompile Include="Mask.cpp" />
     <ClCompile Include="OpenCL.cpp" />
     <ClCompile Include="OpenCLProgram.cpp" />
