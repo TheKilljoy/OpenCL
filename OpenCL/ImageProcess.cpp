@@ -48,7 +48,7 @@ cv::Mat ImageProcess::convertBGR2YCrCb(const cv::Mat& originalImage) const
 {
 	cv::Mat outImage = originalImage.clone();
 	int channels = originalImage.channels();
-	uint b, g, r, y;
+	uint8_t b, g, r, y;
 
 	for (int iy = 0; iy < originalImage.rows; iy++) {
 		for (int ix = 0; ix < originalImage.cols; ix++) {

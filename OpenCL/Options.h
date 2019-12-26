@@ -10,4 +10,5 @@ struct Options
 	std::vector<std::string> fileNames;
 	std::string outputDir = "Output";
 	std::string currentFilePath;
+	float sigma;
 };

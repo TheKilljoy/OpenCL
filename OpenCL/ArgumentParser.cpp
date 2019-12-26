@@ -70,6 +70,12 @@ bool ArgumentParser::parseArguments(const int argc, char** argv, Options& option
 
 		if (argAndPara->argument.compare("-gb") == 0)
 		{
+			if (argAndPara->parameters.size() == 0)
+			{
+				std::cout << "Gaussian blur needs a value for sigma as parameter\n";
+				return false;
+			}
+			options.sigma = std::stof(argAndPara->parameters[0]);
 			options.gaussianBlur = true;
 		}
 
@@ -90,7 +96,7 @@ void ArgumentParser::printUsage(int error)
 	std::cout << "Usage:\n"\
 		<< "-if: path to input file(s) or input folder(s), sperate them with a space\n"\
 		<< "-od: path to output directory\n"\
-		<< "-gb: use gaussian blur on input files\n"\
+		<< "-gb: <sigma> use gaussian blur on input files\n"\
 		<< "-cv: use conversion from rgb to ycbcr on input files\n\n"\
 		<< "Specify at least one input file/folder, and a mode (gaussian blur or conversion)\n";
 	std::exit(error);
