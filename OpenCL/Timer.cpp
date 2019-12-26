@@ -11,7 +11,7 @@ void Timer::start(const std::string& message)
 	startTime = std::chrono::high_resolution_clock::now();
 }
 
-void Timer::stop()
+double Timer::stop()
 {
 	auto endTimepoint = std::chrono::high_resolution_clock::now();
 	auto start = std::chrono::time_point_cast<std::chrono::microseconds>(startTime).time_since_epoch().count();
@@ -20,4 +20,6 @@ void Timer::stop()
 	auto duration = end - start;
 	double ms = duration * 0.001;
 	std::cout << message << " took " << duration << "us (" << ms << "ms)\n";
+	
+	return ms * 0.001;
 }

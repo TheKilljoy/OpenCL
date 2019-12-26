@@ -2,6 +2,7 @@
 #include "OpenCLProgram.h"
 #include <CL/cl.hpp>
 #include "Timer.h"
+#include "FileWriter.h"
 
 // source: https://stackoverflow.com/questions/3692954/add-custom-messages-in-assert
 #ifndef NDEBUG
@@ -51,10 +52,11 @@ void OpenCLProgram::startProgram(const cl::NDRange& local, const cl::NDRange& gl
 	m_Queue->enqueueNDRangeKernel(*m_Kernel, cl::NullRange, global, local);
 }
 
-std::vector<void*> OpenCLProgram::getResults() const
+std::vector<void*> OpenCLProgram::getResults(FileWriter& fWriter, const int row, const int col) const
 {
 	m_Queue->finish();
-	timer->stop();
+	fWriter.writeSingleValueToColumn(row, col, timer->stop());
+	// timer->stop();
 	std::vector<void*> out;
 	for (int i = 0; i < m_OutBuffers.size(); ++i)
 	{
