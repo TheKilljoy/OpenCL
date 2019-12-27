@@ -11,8 +11,6 @@ private:
 	void loadOldData(const std::string& path);
 	void openFile(const std::string& path);
 	void writeContent();
-	bool is_not_digit(char c);
-	bool row_compare(const std::vector<std::string>& row1, const std::vector<std::string>& row2);
 public:
 	FileWriter(const std::string& path, const bool oldFile);
 	FileWriter(const std::string& path, const std::string& filename, const bool oldFile);
@@ -21,7 +19,6 @@ public:
 	void resizeRows(const int number);
 	void resizeColumns(const int number);
 	void closeFile();
-	void sortByFirstColumn();
 	void writeSingleValueToColumn(const int row, const int column, const double value);
 	void writeTextToColumn(const int row, const int column, const std::string& data);
 	void writeHeadline(const std::vector<std::string>& headline);
