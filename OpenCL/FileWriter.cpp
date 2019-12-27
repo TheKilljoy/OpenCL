@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "FileWriter.h"
+#include <algorithm>
 
 FileWriter::FileWriter(const std::string& path, const bool oldFile) {
 	filename = "measurements.csv";
@@ -61,7 +62,9 @@ void FileWriter::loadOldData(const std::string& path) {
 }
 
 void FileWriter::writeSingleValueToColumn(const int row, const int column, const double value) {
-	content[row][column] = std::to_string(value);
+	std::string buffer = std::to_string(value);
+	std::replace(buffer.begin(), buffer.end(), '.', ',');
+	content[row][column] = buffer;
 }
 
 void FileWriter::writeTextToColumn(const int row, const int column, const std::string& data) {
