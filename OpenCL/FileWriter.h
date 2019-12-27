@@ -5,18 +5,21 @@ private:
 	std::ifstream loadFile;
 	std::ofstream writeFile;
 	std::string* iBuffer;
+	std::vector<std::vector<std::string>> content;
 	std::string filename;
 
 	void loadOldData(const std::string& path);
 	void openFile(const std::string& path);
+	void writeContent();
 public:
-	FileWriter(const std::string& path);
-	FileWriter(const std::string& path, const std::string& filename);
+	FileWriter(const std::string& path, const bool oldFile);
+	FileWriter(const std::string& path, const std::string& filename, const bool oldFile);
 	~FileWriter();
 
+	void resizeRows(const int number);
+	void resizeColumns(const int number);
 	void closeFile();
-	void writeSingleLine(const double value);
-	void writeSingleLine(const std::vector<double>& values);
-	void writeMultipleLines(const std::vector<double>& values, const int lineBreak);
-	void writeText(const std::string& data);
+	void writeSingleValueToColumn(const int row, const int column, const double value);
+	void writeTextToColumn(const int row, const int column, const std::string& data);
+	void writeHeadline(const std::vector<std::string>& headline);
 };

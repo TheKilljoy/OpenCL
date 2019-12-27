@@ -15,6 +15,8 @@ namespace cl
 
 class Timer;
 
+class FileWriter;
+
 //useful infos:
 //opencl errors: https://streamhpc.com/blog/2013-04-28/opencl-error-codes/
 //opencl 1.2 reference card (C): https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/OpenCL-1.2-refcard.pdf
@@ -32,7 +34,7 @@ public:
 	void setImage2D(const int index, const size_t width, const size_t height, const size_t pixelSize, const unsigned char* imageData, bool readOnly);
 	void startProgram(const cl::NDRange& global) const;
 	void startProgram(const cl::NDRange& local, const cl::NDRange& global) const;
-	std::vector<void*> getResults() const;
+	std::vector<void*> getResults(FileWriter& fWriter, const int row, const int col) const;
 
 private:
 	const std::string* loadKernelFile(const std::string& filepath) const;

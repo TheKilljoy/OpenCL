@@ -8,5 +8,5 @@ public:
 	Timer();
 	~Timer();
 	void start(const std::string& message);
-	void stop();
+	double stop();
 };

@@ -1,16 +1,20 @@
 #include "pch.h"
 #include "FileWriter.h"
 
-FileWriter::FileWriter(const std::string& path) {
+FileWriter::FileWriter(const std::string& path, const bool oldFile) {
 	filename = "measurements.csv";
 	iBuffer = new std::string();
-	this->loadOldData(path);
+	if (oldFile) {
+		this->loadOldData(path);
+	}
 	this->openFile(path);
 }
 
-FileWriter::FileWriter(const std::string& path, const std::string& filename): filename(filename) {
+FileWriter::FileWriter(const std::string& path, const std::string& filename, const bool oldFile): filename(filename) {
 	iBuffer = new std::string();
-	this->loadOldData(path);
+	if (oldFile) {
+		this->loadOldData(path);
+	}
 	this->openFile(path);
 }
 
@@ -28,7 +32,18 @@ void FileWriter::openFile(const std::string& path) {
 	writeFile << *iBuffer;
 }
 
+void FileWriter::resizeRows(const int number) {
+	content.resize(number);
+}
+
+void FileWriter::resizeColumns(const int number) {
+	for (int i = 0; i < content.size(); i++) {
+		content[i].resize(number);
+	}
+}
+
 void FileWriter::closeFile() {
+	this->writeContent();
 	writeFile.close();
 }
 
@@ -45,28 +60,25 @@ void FileWriter::loadOldData(const std::string& path) {
 	loadFile.close();
 }
 
-void FileWriter::writeSingleLine(const double value) {
-	writeFile << std::to_string(value) + "\n";
+void FileWriter::writeSingleValueToColumn(const int row, const int column, const double value) {
+	content[row][column] = std::to_string(value);
 }
 
-void FileWriter::writeSingleLine(const std::vector<double>& values) {
-	for (double elem : values) {
-		writeFile << std::to_string(elem) + ";";
+void FileWriter::writeTextToColumn(const int row, const int column, const std::string& data) {
+	content[row][column] = data;
+}
+
+void FileWriter::writeHeadline(const std::vector<std::string>& headline) {
+	for (int i = 0; i < headline.size(); i++) {
+		content[0][i] = headline[i];
 	}
-	writeFile << "\n";
 }
 
-// lineBreak -> after which number of values a line break should occur
-void FileWriter::writeMultipleLines(const std::vector<double>& values, const int lineBreak) {
-	for (int i = 0; i < values.size(); i++) {
-		if (i % (lineBreak - 1) == 0) {
-			writeFile << "\n";
+void FileWriter::writeContent() {
+	for (auto row : content) {
+		for (auto col : row) {
+			writeFile << col + ";";
 		}
-		writeFile << std::to_string(values[i]) + ";";
+		writeFile << "\n";
 	}
-	writeFile << "\n";
-}
-
-void FileWriter::writeText(const std::string& data) {
-	writeFile << data;
 }
