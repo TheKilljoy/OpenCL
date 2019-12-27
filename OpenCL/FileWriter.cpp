@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "FileWriter.h"
+#include <algorithm>
 
 FileWriter::FileWriter(const std::string& path, const bool oldFile) {
 	filename = "measurements.csv";
@@ -61,7 +62,9 @@ void FileWriter::loadOldData(const std::string& path) {
 }
 
 void FileWriter::writeSingleValueToColumn(const int row, const int column, const double value) {
-	content[row][column] = std::to_string(value);
+	std::string buffer = std::to_string(value);
+	std::replace(buffer.begin(), buffer.end(), '.', ',');
+	content[row][column] = buffer;
 }
 
 void FileWriter::writeTextToColumn(const int row, const int column, const std::string& data) {
@@ -81,4 +84,36 @@ void FileWriter::writeContent() {
 		}
 		writeFile << "\n";
 	}
+}
+
+bool FileWriter::is_not_digit(char c)
+{
+	return !std::isdigit(c);
+}
+
+bool FileWriter::row_compare(const std::vector<std::string>& row1, const std::vector<std::string>& row2) {
+	// sorted by first column
+	std::string column1 = row1[0], column2 = row2[0];
+
+	std::string::iterator it1 = column1.begin(), it2 = column2.begin();
+
+	if (std::isdigit(column1[0]) && std::isdigit(column2[0])) {
+		int n1, n2;
+		std::stringstream ss(column1);
+		ss >> n1;
+		ss.clear();
+		ss.str(column2);
+		ss >> n2;
+
+		if (n1 != n2) return n1 < n2;
+
+		it1 = std::find_if(column1.begin(), column1.end(), &FileWriter::is_not_digit);
+		it2 = std::find_if(column2.begin(), column2.end(), &FileWriter::is_not_digit);
+	}
+
+	return std::lexicographical_compare(it1, column1.end(), it2, column2.end());
+}
+
+void FileWriter::sortByFirstColumn() {
+	std::sort(content.begin(), content.end(), &FileWriter::row_compare);
 }

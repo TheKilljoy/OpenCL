@@ -201,6 +201,7 @@ int main(int argc, char** argv)
 		++fileRowCounter;
 	}
 	std::cout << "finished\n";
+	fWriter.sortByFirstColumn();
 	fWriter.closeFile();
 	return 0;
 }
